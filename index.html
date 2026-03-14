@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow">
+  <title>Shimla Risk Guard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ONBOARDING (non-skippable)
+══════════════════════════════════════════ -->
+<div id="onboarding">
+  <div class="onboard-box">
+    <div class="onboard-header">
+      <span class="warn-icon">⚠</span>
+      <h1>Shimla Risk Guard — Mandatory Pre-Use Notice</h1>
+    </div>
+    <div class="onboard-body">
+      <p>Before proceeding, read and acknowledge the following conditions. This screen appears every session and cannot be skipped or remembered.</p>
+      <div class="clause">
+        <strong>01 — Nature of Tool</strong>
+        <p>This is a negative-signal screening aid only. It flags proposals that are likely prohibited under Shimla building regulations. It does not confirm compliance, legality, or approval of any proposal.</p>
+      </div>
+      <div class="clause">
+        <strong>02 — No Legal Authority</strong>
+        <p>Output from this tool carries no legal weight. The authoritative sources are the Interim Development Plan (IDP) Shimla 2015 (Notification 13-08-2015, HP Gazette p.2989), the Shimla Planning Area Development Plan 2041, and related gazette notifications. Always read the law. <a href="https://admis.hp.nic.in/tcpshimla/" target="_blank" rel="noopener" style="color:#c0392b;">Town &amp; Country Planning Shimla ↗</a></p>
+      </div>
+      <div class="clause">
+        <strong>03 — Human Accountability Required</strong>
+        <p>Every check must be logged and signed by a qualified architect or senior professional. This tool does not replace that accountability.</p>
+      </div>
+      <div class="clause">
+        <strong>04 — No Data Retained</strong>
+        <p>Nothing entered here is stored, transmitted, or logged by this software. Each session starts completely fresh.</p>
+      </div>
+      <div class="clause">
+        <strong>05 — Scope Limitation</strong>
+        <p>This tool covers a limited ruleset (v1.2). FAR rules are not active — FAR varies by building use category and plot band per IDP Shimla 2015 and cannot be applied without a use-category input. Cases outside this tool's scope return ⚫ OUTSIDE TOOL SCOPE — not clearance.</p>
+      </div>
+    </div>
+    <div class="onboard-footer">
+      <span>REF: SHIMLA-RG-v1.2 · 2026</span>
+      <button class="btn-proceed" onclick="proceed()">I Understand This Tool Is Not An Approval Authority</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════ -->
+<div id="app">
+  <header>
+    <div class="logo">SHIMLA <span>RISK</span> GUARD</div>
+    <div class="header-tag">NEGATIVE-ONLY · v1.2 · INTERNAL USE</div>
+  </header>
+
+  <main>
+    <!-- FORM -->
+    <div class="form-panel">
+      <div class="panel-label">Proposal Parameters</div>
+
+      <div class="field">
+        <label>Zone Type</label>
+        <select id="zone">
+          <option value="">— Select —</option>
+          <option value="core">Core Area</option>
+          <option value="noncore">Non-Core Area</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Slope (degrees)</label>
+        <input type="number" id="slope" min="0" max="90" placeholder="e.g. 28" />
+        <div class="hint">Measured across the proposed building footprint per site survey or contour map</div>
+      </div>
+
+      <div class="field">
+        <label>Number of Floors</label>
+        <input type="number" id="floors" min="1" max="20" placeholder="e.g. 3" />
+        <div class="hint">Excluding attic</div>
+      </div>
+
+      <div class="field">
+        <label>Road Width (metres)</label>
+        <input type="number" id="road" min="0" step="0.1" placeholder="e.g. 4.5" />
+      </div>
+
+      <div class="field">
+        <label>Attic Height (metres)</label>
+        <input type="number" id="attic" min="0" step="0.1" placeholder="e.g. 2.8" />
+        <div class="hint">Enter 0 if no attic</div>
+      </div>
+
+      <div class="field">
+        <label>Green / Forest Zone?</label>
+        <select id="greenzone">
+          <option value="">— Select —</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Hill Cut Height (metres)</label>
+        <input type="number" id="hillcut" min="0" step="0.1" placeholder="e.g. 2.0" />
+        <div class="hint">Enter 0 if no hill cutting required</div>
+      </div>
+
+      <div class="field">
+        <label>Plot Area (sq m)</label>
+        <input type="number" id="plot_area" min="0" step="1" placeholder="e.g. 200" />
+        <div class="hint">FAR check — rule pending official clause confirmation</div>
+      </div>
+
+      <div class="field">
+        <label>Total Built-Up Area (sq m)</label>
+        <input type="number" id="built_up_area" min="0" step="1" placeholder="e.g. 280" />
+        <div class="hint">FAR check — rule pending official clause confirmation</div>
+      </div>
+
+      <button class="btn-check" onclick="runCheck()">&#9658; Run Risk Check</button>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-panel">
+      <div class="panel-label">Risk Assessment Output</div>
+
+      <div id="result-area">
+        <div class="result-empty">
+          <p>No check run yet.<br/>Fill parameters and run check.</p>
+        </div>
+      </div>
+
+      <div class="log-section">
+        <div class="log-label">Session Log (not stored)</div>
+        <div id="log-list">
+          <div class="log-entry"><span class="log-time">——:——</span><span>Awaiting first check.</span></div>
+        </div>
+      </div>
+
+      <button class="btn-pdf" onclick="printLog()">&#9634; Print Manual Accountability Log</button>
+      <button class="btn-reset" onclick="resetSession()">&#8635; Reset Session</button>
+    </div>
+  </main>
+
+  <footer>
+    <span>SHIMLA RISK GUARD · INTERNAL TOOL · NOT FOR PUBLIC USE</span>
+    <span>Ruleset v1.2 · Source: IDP Shimla 2015 (Notif. 13-08-2015, HP Gazette p.2989) + Shimla Planning Area DP-2041 (June 2023) · Last reviewed: 2026-03 · No data retained · Read the law</span>
+  </footer>
+</div>
+
+<script src="rules.js"></script>
+<script>
+  let sessionLog = [];
+
+  // ── Onboarding ──────────────────────────────────────────────────────
+  function proceed() {
+    document.getElementById('onboarding').style.display = 'none';
+    const app = document.getElementById('app');
+    app.style.display = 'flex';
+    app.style.flexDirection = 'column';
+  }
+
+  function getVal(id) { return document.getElementById(id).value.trim(); }
+
+  // ── Strict range validation ──────────────────────────────────────────
+  // HTML min/max are hints only. JS is the real gate.
+  function validateParams(p) {
+    if (!p.zone)                          return 'Zone is required.';
+    if (!p.greenzone)                     return 'Green/Forest zone selection is required.';
+    if (isNaN(p.slope))                   return 'Slope is required.';
+    if (p.slope < 0 || p.slope > 90)     return 'Slope must be between 0° and 90°.';
+    if (isNaN(p.floors))                  return 'Number of floors is required.';
+    if (p.floors < 1 || p.floors > 50)   return 'Floors must be at least 1.';
+    if (isNaN(p.road))                    return 'Road width is required.';
+    if (p.road < 0)                       return 'Road width cannot be negative.';
+    if (isNaN(p.attic))                   return 'Attic height is required.';
+    if (p.attic < 0)                      return 'Attic height cannot be negative.';
+    if (p.hillcut < 0)                    return 'Hill cut height cannot be negative.';
+    if (p.plot_area < 0)                  return 'Plot area cannot be negative.';
+    if (p.built_up_area < 0)             return 'Built-up area cannot be negative.';
+    return null; // valid
+  }
+
+  // ── Run check ───────────────────────────────────────────────────────
+  function runCheck() {
+    const params = {
+      zone:          getVal('zone'),
+      slope:         parseFloat(getVal('slope')),
+      floors:        parseInt(getVal('floors')),
+      road:          parseFloat(getVal('road')),
+      attic:         parseFloat(getVal('attic')),
+      greenzone:     getVal('greenzone'),
+      hillcut:       parseFloat(getVal('hillcut')) || 0,
+      plot_area:     parseFloat(getVal('plot_area')) || 0,
+      built_up_area: parseFloat(getVal('built_up_area')) || 0,
+    };
+
+    const err = validateParams(params);
+    if (err) { alert(err); return; }
+
+    const result = evaluateRules(params);
+    renderResult(result, params);
+    addLog(result, params);
+  }
+
+  // ── Reset session ────────────────────────────────────────────────────
+  function resetSession() {
+    // Clear all form fields
+    ['zone', 'greenzone'].forEach(id => document.getElementById(id).value = '');
+    ['slope','floors','road','attic','hillcut','plot_area','built_up_area']
+      .forEach(id => document.getElementById(id).value = '');
+
+    // Reset result panel
+    document.getElementById('result-area').innerHTML =
+      '<div class="result-empty"><p>No check run yet.<br/>Fill parameters and run check.</p></div>';
+
+    // Reset session log
+    sessionLog = [];
+    document.getElementById('log-list').innerHTML =
+      '<div class="log-entry"><span class="log-time">——:——</span><span>Session reset.</span></div>';
+  }
+
+  // ── Render result ────────────────────────────────────────────────────
+  function renderResult(result, params) {
+    const area = document.getElementById('result-area');
+    const iconMap = {
+      prohibited: { icon: '🔴', label: 'PROHIBITED',         cls: 'red',
+        title:  'Proposal Cannot Proceed',
+        footer: 'This proposal contains one or more hard violations. Do not present to senior review. Discard or fundamentally redesign before recheck.' },
+      highrisk:   { icon: '🟠', label: 'HIGH RISK',          cls: 'orange',
+        title:  'Proceed With Extreme Caution',
+        footer: 'This proposal has significant risk factors. Senior review is mandatory before any further work. Read the relevant bylaws directly.' },
+      scope:      { icon: '⚫', label: 'OUTSIDE TOOL SCOPE', cls: 'black',
+        title:  'Cannot Assess — Manual Review Required',
+        footer: 'No rule triggered within this tool\'s v1.2 ruleset. This is NOT clearance. Consult IDP Shimla 2015, Shimla Planning Area DP-2041, and a senior architect directly.' },
+    };
+    const m = iconMap[result.verdict];
+    const reasonsHtml = result.reasons.map(r => {
+      return `<div class="reason-item">
+        <span class="reason-finding">${r.finding}</span>
+        ${r.source ? `<span class="reason-src">↳ ${r.source}</span>` : ''}
+      </div>`;
+    }).join('');
+    area.innerHTML = `
+      <div class="result-card ${m.cls}">
+        <div class="result-badge">
+          <div class="result-icon">${m.icon}</div>
+          <div>
+            <div class="result-label">${m.label}</div>
+            <div class="result-title">${m.title}</div>
+          </div>
+        </div>
+        ${result.reasons.length ? `<div class="result-reasons"><p>Triggered conditions</p>${reasonsHtml}</div>` : ''}
+        <div class="result-footer"><p>${m.footer}</p></div>
+      </div>`;
+
+    // FAR note — shown whenever FAR inputs were entered, regardless of verdict
+    if (params && (params.plot_area > 0 || params.built_up_area > 0)) {
+      const far = (params.plot_area > 0 && params.built_up_area > 0)
+        ? (params.built_up_area / params.plot_area).toFixed(2)
+        : '—';
+      area.innerHTML += `
+        <div class="far-note">
+          <span class="far-note-icon">⚫</span>
+          <div>
+            <strong>FAR — Outside Tool Scope</strong>
+            <p>Entered FAR ratio: <strong>${far}</strong> (${params.built_up_area}m² ÷ ${params.plot_area}m²). FAR limits in IDP Shimla 2015 are not a single number — they vary by building use category (residential / tourism / commercial / shopping complex) and plot size band. This tool does not collect use category. FAR must be verified manually against the regulation table in IDP Shimla 2015, HP Gazette p.2989.</p>
+          </div>
+        </div>`;
+    }
+  }
+
+  // ── Session log ──────────────────────────────────────────────────────
+  function addLog(result, params) {
+    const now  = new Date();
+    const time = now.toTimeString().slice(0, 5);
+    const labelMap = { prohibited: '🔴 PROHIBITED', highrisk: '🟠 HIGH RISK', scope: '⚫ OUTSIDE TOOL SCOPE' };
+    sessionLog.push({ time, label: labelMap[result.verdict], reasons: result.reasons, params });
+
+    const list = document.getElementById('log-list');
+    if (sessionLog.length === 1) list.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    div.innerHTML = `<span class="log-time">${time}</span><span>${labelMap[result.verdict]}</span>`;
+    list.appendChild(div);
+  }
+
+  // ── Print accountability log ─────────────────────────────────────────
+  function printLog() {
+    if (sessionLog.length === 0) { alert('No checks run in this session.'); return; }
+
+    const win = window.open('', '_blank');
+    if (!win) { alert('Popup blocked. Allow popups for this page and try again.'); return; }
+
+    const rows = sessionLog.map((e, i) => {
+      const p = e.params;
+      const inputs = [
+        `Zone: ${p.zone}`,
+        `Slope: ${p.slope}°`,
+        `Floors: ${p.floors}`,
+        `Road: ${p.road}m`,
+        `Attic: ${p.attic}m`,
+        `Green zone: ${p.greenzone}`,
+        `Hill cut: ${p.hillcut}m`,
+        p.plot_area     ? `Plot area: ${p.plot_area}m²`    : null,
+        p.built_up_area ? `Built-up: ${p.built_up_area}m²` : null,
+      ].filter(Boolean).join(' · ');
+
+      return `<tr>
+        <td>${i + 1}</td>
+        <td>${e.time}</td>
+        <td style="font-weight:bold">${e.label}</td>
+        <td style="font-size:10px">${inputs}</td>
+        <td style="font-size:10px">${e.reasons.map(r => r.source ? `${r.finding} — ${r.source}` : r.finding).join('<br>')}</td>
+        <td style="color:#aaa">_______________</td>
+        <td style="color:#aaa">_______________</td>
+      </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html><head>
+<title>Shimla Risk Guard — Accountability Log</title>
+<style>
+  body   { font-family: monospace; font-size: 12px; padding: 30px; color: #111; }
+  h2     { font-size: 14px; margin-bottom: 6px; }
+  .meta  { font-size: 11px; color: #555; margin-bottom: 8px; }
+  .disc  { font-size: 11px; color: #a00; border: 1px solid #a00; padding: 8px 12px; margin-bottom: 20px; }
+  table  { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 7px 9px; text-align: left; vertical-align: top; }
+  th     { background: #f0f0f0; font-size: 11px; }
+  .sig   { margin-top: 28px; font-size: 11px; color: #333; line-height: 2.2; }
+  .foot  { margin-top: 16px; font-size: 10px; color: #999; border-top: 1px solid #ddd; padding-top: 8px; }
+</style></head><body>
+<h2>SHIMLA RISK GUARD — PRELIMINARY SCREENING LOG</h2>
+<div class="meta">
+  Date: ${new Date().toLocaleDateString('en-IN')} &nbsp;|&nbsp;
+  Ruleset: v1.2 &nbsp;|&nbsp;
+  Source: IDP Shimla 2015 (HP Gazette p.2989) + DP-2041 &nbsp;|&nbsp;
+  Session data not retained after print
+</div>
+<div class="disc">
+  DISCLAIMER: This record captures a preliminary screening result from Shimla Risk Guard.
+  It is not a compliance approval, legal opinion, or sanction.
+  The applicable law must be read directly before any professional decision is made.
+</div>
+<table>
+  <tr>
+    <th>#</th><th>Time</th><th>Screening Result</th>
+    <th>Inputs Entered</th><th>Triggered Conditions</th>
+    <th>Clause Ref (handwrite)</th><th>Gazette Ref (handwrite)</th>
+  </tr>
+  ${rows}
+</table>
+<div class="sig">
+  Project Name: ________________________________ &nbsp;&nbsp;
+  Site Location: ________________________________<br/>
+  Junior Signature: ____________________________ &nbsp;&nbsp;
+  Senior Approval: _____________________________ &nbsp;&nbsp;
+  Date: ___________
+</div>
+<div class="foot">
+  Shimla Risk Guard v1.2 · Internal tool · Not for public use ·
+  Not a compliance approval · Verify ruleset currency quarterly against IDP Shimla 2015 and DP-2041 gazette.
+</div>
+</body></html>`;
+
+    // Use onload to ensure full render before print — fixes blank-page issue
+    win.document.write(html);
+    win.document.close();
+    win.onload = function() { win.print(); };
+    // Fallback for browsers that fire onload before write completes
+    setTimeout(function() { if (!win.closed) win.print(); }, 800);
+  }
+</script>
+</body>
+</html>
